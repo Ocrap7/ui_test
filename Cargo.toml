@@ -1,0 +1,2 @@
+[workspace]
+members = ["dui_core", "dui_renderer", "dui_util", "examples/sandbox"]
