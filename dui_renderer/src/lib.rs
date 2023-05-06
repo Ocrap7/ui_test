@@ -1,11 +1,18 @@
-use dui_core::view::Element;
+#![feature(return_position_impl_trait_in_trait)]
+
+use std::rc::Rc;
+
+use dui_core::{
+    layout::get_id_manger,
+    view::{Element, VStack, View},
+};
 use vello::{
     kurbo::{Affine, Rect},
     peniko::{Brush, Color},
     util::{RenderContext, RenderSurface},
     RenderParams, Renderer, RendererOptions, Scene, SceneBuilder,
 };
-use winit::{dpi::PhysicalSize, event::Event, event_loop::EventLoop, window::Window};
+use winit::{dpi::PhysicalSize, event::{Event, WindowEvent}, event_loop::EventLoop, window::Window};
 
 fn create_window(event_loop: &winit::event_loop::EventLoopWindowTarget<()>) -> Window {
     use winit::{dpi::LogicalSize, window::WindowBuilder};
@@ -27,20 +34,25 @@ struct RenderState {
 struct MyView;
 
 impl Element for MyView {
-    type Body = Rect;
-
-    fn body(&self) -> Self::Body {
-        Rect::from_origin_size((0.0, 0.0), (100.0, 100.0))
+    fn body(&self) -> impl Element + View {
+        VStack::from((
+            Rect::from_origin_size((0.0, 0.0), (100.0, 100.0)),
+            Rect::from_origin_size((0.0, 0.0), (100.0, 100.0)),
+        ))
     }
 }
+
+impl MyView {}
 
 pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderContext) {
     let mut scene = Scene::new();
     let mut state: Option<RenderState> = None;
 
+    window.request_redraw();
+    window.focus_window();
     event_loop.run(move |event, _, _| match event {
         Event::MainEventsCleared => {
-            window.request_redraw();
+            // window.focus_window();
         }
         Event::RedrawRequested(_) => {
             let Some(state) = &mut state else { return };
@@ -57,17 +69,46 @@ pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderCont
                 ),
             );
 
+            let mut path = Vec::with_capacity(512);
+            path.push(0);
+
+            // let path = Rc::new(path);
+
+            let mut lctx = dui_core::drawing::LayoutContext {
+                path: &mut path,
+                scale_factor: window.scale_factor(),
+            };
+
+            let m = MyView;
+            m.body().layout(
+                &mut lctx,
+                Rect::from_origin_size(
+                    (0.0, 0.0),
+                    (state.size.width as f64, state.size.height as f64),
+                ),
+            );
+
             let mut dctx = dui_core::drawing::DrawingContext {
+                builder: Rc::new(scene_builder),
+                path: Rc::new(path),
+
+                background_color: Color::TRANSPARENT,
+                foreground_color: Color::BLACK,
+
                 bounding: Rect::from_origin_size(
                     (0.0, 0.0),
                     (state.size.width as f64, state.size.height as f64),
                 ),
-                builder: scene_builder,
-                background_color: Color::TRANSPARENT,
-                foreground_color: Color::BLACK,
+                first: true,
+
+                scale_factor: window.scale_factor(),
             };
 
-            dui_core::drawing::draw(&mut dctx, MyView);
+            m.view().draw(&mut dctx);
+
+            println!("{:#?}", get_id_manger());
+
+            // dui_core::drawing::draw(dctx, MyView, 0);
 
             let params = RenderParams {
                 width: state.size.width,

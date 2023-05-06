@@ -1,19 +1,30 @@
-use std::{collections::HashMap, sync::RwLock};
+use std::{
+    collections::HashMap,
+    sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
+};
 
 use vello::kurbo::Rect;
 
 lazy_static::lazy_static! {
     static ref ID_MANAGER: RwLock<IdManager> = RwLock::new(IdManager {
         id_mappings: HashMap::new(),
-        next_id: Id(rand::random())
+        // next_id: Id(rand::random())
     });
+}
+
+pub fn get_id_manger() -> RwLockReadGuard<'static, IdManager> {
+    ID_MANAGER.read().unwrap()
+}
+
+pub fn get_id_manger_mut() -> RwLockWriteGuard<'static, IdManager> {
+    ID_MANAGER.write().unwrap()
 }
 
 #[derive(Debug, Default)]
 pub struct Layout {
-    full_bounds: Rect,
-    border_bounds: Rect,
-    content_bounds: Rect,
+    pub full_bounds: Rect,
+    pub border_bounds: Rect,
+    pub content_bounds: Rect,
 }
 
 pub const LAYOUT_ZERO: Layout = Layout {
@@ -22,25 +33,35 @@ pub const LAYOUT_ZERO: Layout = Layout {
     content_bounds: Rect::ZERO,
 };
 
-#[derive(Copy, Clone, Hash, Debug, PartialEq, Eq)]
-pub struct Id(u64);
+#[derive(Clone, Hash, Debug, PartialEq, Eq)]
+pub struct Id(Vec<u32>);
+
+impl From<Vec<u32>> for Id {
+    fn from(value: Vec<u32>) -> Self {
+        Id(value)
+    }
+}
 
 #[derive(Debug)]
 pub struct IdManager {
     pub(crate) id_mappings: HashMap<Id, Layout>,
-    next_id: Id,
+    // next_id: Id,
 }
 
 impl IdManager {
-    pub fn gen_id(&mut self) -> Id {
-        self.next_id.0 += 1;
-        Id(self.next_id.0 - 1)
-    }
+    // pub fn gen_id(&mut self) -> Id {
+    //     self.next_id.0 += 1;
+    //     Id(self.next_id.0 - 1)
+    // }
 
-    pub fn gen_insert_zero(&mut self) -> Id {
-        let id = self.gen_id();
-        self.id_mappings.insert(id, Default::default());
-        id
+    // pub fn gen_insert_zero(&mut self) -> Id {
+    //     let id = self.gen_id();
+    //     self.id_mappings.insert(id, Default::default());
+    //     id
+    // }
+
+    pub fn insert(&mut self, id: impl Into<Id>) {
+        self.id_mappings.insert(id.into(), Layout::default());
     }
 
     pub fn set_layout_full_rect(&mut self, id: Id, layout: Rect) -> Option<Layout> {
