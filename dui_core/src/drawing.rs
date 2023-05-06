@@ -11,6 +11,6 @@ pub struct DrawingContext<'a> {
     pub bounding: Rect,
 }
 
-pub fn draw<'a>(dctx: &mut DrawingContext<'a>, view: impl Element) {
+pub fn draw(dctx: &mut DrawingContext<'_>, view: impl Element) {
     view.body().draw(dctx)
 }

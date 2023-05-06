@@ -13,7 +13,7 @@ fn create_window(event_loop: &winit::event_loop::EventLoopWindowTarget<()>) -> W
         .with_inner_size(LogicalSize::new(1044, 800))
         .with_resizable(true)
         .with_title("Vello demo")
-        .build(&event_loop)
+        .build(event_loop)
         .unwrap()
 }
 
