@@ -1,2 +1,2 @@
 [workspace]
-members = ["dui_core", "dui_renderer", "dui_util", "examples/sandbox"]
+members = ["dui_core", "dui_renderer", "dui_util", "dui_macros", "examples/sandbox"]

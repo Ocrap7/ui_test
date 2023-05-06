@@ -6,3 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+vello = { git = "https://github.com/linebender/vello.git" }
+
+dui_macros = { path = "../dui_macros" }
+lazy_static = "1.4.0"
+rand = "0.8.5"

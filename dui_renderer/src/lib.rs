@@ -1,3 +1,4 @@
+use dui_core::view::Element;
 use vello::{
     kurbo::{Affine, Rect},
     peniko::{Brush, Color},
@@ -23,6 +24,16 @@ struct RenderState {
     device: usize,
 }
 
+struct MyView;
+
+impl Element for MyView {
+    type Body = Rect;
+
+    fn body(&self) -> Self::Body {
+        Rect::from_origin_size((0.0, 0.0), (100.0, 100.0))
+    }
+}
+
 pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderContext) {
     let mut scene = Scene::new();
     let mut state: Option<RenderState> = None;
@@ -45,6 +56,18 @@ pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderCont
                     (state.size.width as f64, state.size.height as f64),
                 ),
             );
+
+            let mut dctx = dui_core::drawing::DrawingContext {
+                bounding: Rect::from_origin_size(
+                    (0.0, 0.0),
+                    (state.size.width as f64, state.size.height as f64),
+                ),
+                builder: scene_builder,
+                background_color: Color::TRANSPARENT,
+                foreground_color: Color::BLACK,
+            };
+
+            dui_core::drawing::draw(&mut dctx, MyView);
 
             let params = RenderParams {
                 width: state.size.width,

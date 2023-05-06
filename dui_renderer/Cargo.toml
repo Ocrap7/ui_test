@@ -10,3 +10,5 @@ wgpu = "0.16.0"
 vello = { git = "https://github.com/linebender/vello.git" }
 winit = "0.28.3"
 pollster = "0.3.0"
+
+dui_core = { path = '../dui_core' }
