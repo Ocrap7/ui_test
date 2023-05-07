@@ -54,15 +54,15 @@ pub fn multi(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let struct_name = syn::Ident::new(&format!("{}{}", name, ucount), name.span());
 
     let val_list: Vec<String> = (0..ucount).map(|i| format!("E{}", i)).collect();
-    let ty_list: Vec<String> = (0..ucount).map(|i| format!("E{}: Element", i)).collect();
+    let ty_list: Vec<String> = (0..ucount).map(|i| format!("E{}: Element + View", i)).collect();
 
     let layouts: Vec<TokenStream> = (0..ucount)
-        .map(|i| format!("{i} => self.{i}.view().layout(lctx, available_rect)"))
+        .map(|i| format!("{i} => self.{i}.layout(lctx, available_rect)"))
         .map(|s| TokenStream::from_str(&s).unwrap())
         .collect();
 
     let draws: Vec<TokenStream> = (0..ucount)
-        .map(|i| format!("{i} => self.{i}.view().draw(dctx)"))
+        .map(|i| format!("{i} => self.{i}.draw(dctx)"))
         .map(|s| TokenStream::from_str(&s).unwrap())
         .collect();
 
@@ -97,7 +97,7 @@ pub fn multi(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 layout
             }
 
-            fn draw_at(&self, dctx: &mut DrawingContext, index: usize) {
+            fn draw_at(&self, dctx: DrawingContext, index: usize) {
                 match index {
                     #(#draws),*,
                     _ => panic!("This Element only has {} children!", #ucount)
@@ -157,7 +157,7 @@ pub fn multi_from(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ucount = folder.0;
 
     let val_list: Vec<String> = (0..ucount).map(|i| format!("E{}", i)).collect();
-    let ty_list: Vec<String> = (0..ucount).map(|i| format!("E{}: Element", i)).collect();
+    let ty_list: Vec<String> = (0..ucount).map(|i| format!("E{}: Element + View", i)).collect();
 
     let val = TokenStream::from_str(&val_list.join(", ")).unwrap();
     let ty = TokenStream::from_str(&ty_list.join(", ")).unwrap();

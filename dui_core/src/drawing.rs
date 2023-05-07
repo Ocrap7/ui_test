@@ -1,16 +1,18 @@
 use std::rc::Rc;
 
-use vello::{kurbo::Rect, peniko::Color, SceneBuilder};
+use dui_util::Rf;
+use vello::{kurbo::Rect, peniko::{Color, Brush}, SceneBuilder};
 
 use crate::{view::{Element, View, ElementIterator}, layout::{get_id_manger_mut, get_id_manger}};
 
 #[derive(Clone)]
 pub struct DrawingContext<'a> {
-    pub builder: Rc<SceneBuilder<'a>>,
-    pub path: Rc<Vec<u32>>,
+    pub builder: Rf<SceneBuilder<'a>>,
+    pub path: Rf<Vec<u32>>,
 
-    pub background_color: Color,
-    pub foreground_color: Color,
+    pub background_brush: Brush,
+    pub fill_brush: Brush,
+    pub foreground_color: Brush,
 
     pub bounding: Rect,
     pub first: bool,

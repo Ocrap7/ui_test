@@ -9,5 +9,7 @@ edition = "2021"
 vello = { git = "https://github.com/linebender/vello.git" }
 
 dui_macros = { path = "../dui_macros" }
+dui_util = { path = "../dui_util" }
+
 lazy_static = "1.4.0"
 rand = "0.8.5"

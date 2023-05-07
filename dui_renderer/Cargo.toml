@@ -12,3 +12,4 @@ winit = "0.28.3"
 pollster = "0.3.0"
 
 dui_core = { path = '../dui_core' }
+dui_util = { path = '../dui_util' }

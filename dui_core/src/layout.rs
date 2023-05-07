@@ -8,7 +8,6 @@ use vello::kurbo::Rect;
 lazy_static::lazy_static! {
     static ref ID_MANAGER: RwLock<IdManager> = RwLock::new(IdManager {
         id_mappings: HashMap::new(),
-        // next_id: Id(rand::random())
     });
 }
 
@@ -20,16 +19,23 @@ pub fn get_id_manger_mut() -> RwLockWriteGuard<'static, IdManager> {
     ID_MANAGER.write().unwrap()
 }
 
+/// This represents the viewable layout of an element
+///
+/// `border_bounds` represents the total physical space
+/// `padding_bounds` is the region taken up by the padding and content
+/// `content_bounds` is the region taken up by only the content
+///
+/// These are all relative to the screen. If there is no border or padding, they should be equal to the content bounds
 #[derive(Debug, Default)]
 pub struct Layout {
-    pub full_bounds: Rect,
     pub border_bounds: Rect,
+    pub padding_bounds: Rect,
     pub content_bounds: Rect,
 }
 
 pub const LAYOUT_ZERO: Layout = Layout {
-    full_bounds: Rect::ZERO,
     border_bounds: Rect::ZERO,
+    padding_bounds: Rect::ZERO,
     content_bounds: Rect::ZERO,
 };
 
@@ -45,34 +51,22 @@ impl From<Vec<u32>> for Id {
 #[derive(Debug)]
 pub struct IdManager {
     pub(crate) id_mappings: HashMap<Id, Layout>,
-    // next_id: Id,
 }
 
 impl IdManager {
-    // pub fn gen_id(&mut self) -> Id {
-    //     self.next_id.0 += 1;
-    //     Id(self.next_id.0 - 1)
-    // }
-
-    // pub fn gen_insert_zero(&mut self) -> Id {
-    //     let id = self.gen_id();
-    //     self.id_mappings.insert(id, Default::default());
-    //     id
-    // }
-
     pub fn insert(&mut self, id: impl Into<Id>) {
         self.id_mappings.insert(id.into(), Layout::default());
     }
 
-    pub fn set_layout_full_rect(&mut self, id: Id, layout: Rect) -> Option<Layout> {
+    pub fn set_layout_padding_rect(&mut self, id: Id, layout: Rect) -> Option<Layout> {
         if let Some(full) = self.id_mappings.get_mut(&id) {
-            full.full_bounds = layout;
+            full.padding_bounds = layout;
             None
         } else {
             self.id_mappings.insert(
                 id,
                 Layout {
-                    full_bounds: layout,
+                    padding_bounds: layout,
                     border_bounds: layout,
                     content_bounds: layout,
                 },
@@ -88,7 +82,7 @@ impl IdManager {
             self.id_mappings.insert(
                 id,
                 Layout {
-                    full_bounds: layout,
+                    padding_bounds: layout,
                     border_bounds: layout,
                     content_bounds: layout,
                 },
@@ -104,7 +98,7 @@ impl IdManager {
             self.id_mappings.insert(
                 id,
                 Layout {
-                    full_bounds: layout,
+                    padding_bounds: layout,
                     border_bounds: layout,
                     content_bounds: layout,
                 },

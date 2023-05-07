@@ -4,15 +4,21 @@ use std::rc::Rc;
 
 use dui_core::{
     layout::get_id_manger,
-    view::{Element, VStack, View},
+    view::{BackgroundImpl, BorderImpl, Element, PaddingImpl, VStack, View},
 };
+use dui_util::Rf;
 use vello::{
     kurbo::{Affine, Rect},
     peniko::{Brush, Color},
     util::{RenderContext, RenderSurface},
     RenderParams, Renderer, RendererOptions, Scene, SceneBuilder,
 };
-use winit::{dpi::PhysicalSize, event::{Event, WindowEvent}, event_loop::EventLoop, window::Window};
+use winit::{
+    dpi::PhysicalSize,
+    event::{Event, WindowEvent},
+    event_loop::EventLoop,
+    window::Window,
+};
 
 fn create_window(event_loop: &winit::event_loop::EventLoopWindowTarget<()>) -> Window {
     use winit::{dpi::LogicalSize, window::WindowBuilder};
@@ -34,9 +40,12 @@ struct RenderState {
 struct MyView;
 
 impl Element for MyView {
-    fn body(&self) -> impl Element + View {
+    fn body(&self) -> impl View {
         VStack::from((
-            Rect::from_origin_size((0.0, 0.0), (100.0, 100.0)),
+            Rect::from_origin_size((0.0, 0.0), (100.0, 100.0))
+                .padding(5.0)
+                .background(Color::RED)
+                .border(5.0, Brush::Solid(Color::REBECCA_PURPLE)),
             Rect::from_origin_size((0.0, 0.0), (100.0, 100.0)),
         ))
     }
@@ -88,12 +97,13 @@ pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderCont
                 ),
             );
 
-            let mut dctx = dui_core::drawing::DrawingContext {
-                builder: Rc::new(scene_builder),
-                path: Rc::new(path),
+            let dctx = dui_core::drawing::DrawingContext {
+                builder: Rf::new(scene_builder),
+                path: Rf::new(path),
 
-                background_color: Color::TRANSPARENT,
-                foreground_color: Color::BLACK,
+                background_brush: Color::TRANSPARENT.into(),
+                fill_brush: Color::BLACK.into(),
+                foreground_color: Color::BLACK.into(),
 
                 bounding: Rect::from_origin_size(
                     (0.0, 0.0),
@@ -104,7 +114,7 @@ pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderCont
                 scale_factor: window.scale_factor(),
             };
 
-            m.view().draw(&mut dctx);
+            m.view().draw(dctx);
 
             println!("{:#?}", get_id_manger());
 

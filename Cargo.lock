@@ -334,6 +334,7 @@ name = "dui_core"
 version = "0.1.0"
 dependencies = [
  "dui_macros",
+ "dui_util",
  "lazy_static",
  "rand",
  "vello",
@@ -353,6 +354,7 @@ name = "dui_renderer"
 version = "0.1.0"
 dependencies = [
  "dui_core",
+ "dui_util",
  "pollster",
  "vello",
  "wgpu",
