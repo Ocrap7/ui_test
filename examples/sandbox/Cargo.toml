@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 dui_renderer = { path = "../../dui_renderer" }
+tokio = { version = "1.28.0", features = ["full"] }

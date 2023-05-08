@@ -1,8 +1,6 @@
-use std::rc::Rc;
-
 use dui_macros::{multi, multi_from};
 use vello::{
-    kurbo::{Affine, Insets, Rect},
+    kurbo::{Affine, Insets, Rect, Size},
     peniko::Brush,
 };
 
@@ -10,15 +8,14 @@ use crate::{
     defaults::DEFAULT_SPACING,
     drawing::{DrawingContext, LayoutContext},
     layout::{get_id_manger, get_id_manger_mut},
+    Alignment, HorizontalAlignment, VerticalALignment,
 };
 
 pub trait Element {
-    fn body(&self) -> impl Element + View {
-        ()
-    }
+    fn body(&self) -> impl Element + View {}
 
     fn view(&self) -> impl View {
-        return self.body();
+        self.body()
     }
 
     fn is_leaf(&self) -> bool {
@@ -27,9 +24,7 @@ pub trait Element {
 }
 
 impl Element for () {
-    fn body(&self) -> impl Element + View {
-        ()
-    }
+    fn body(&self) -> impl Element + View {}
 
     fn is_leaf(&self) -> bool {
         true
@@ -37,11 +32,11 @@ impl Element for () {
 }
 
 impl View for () {
-    fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
+    fn layout(&self, _lctx: &mut LayoutContext, _available_rect: Rect) -> Rect {
         Rect::ZERO
     }
 
-    fn draw(&self, dctx: DrawingContext) {}
+    fn draw(&self, _dctx: DrawingContext) {}
 }
 
 pub trait ElementIterator {
@@ -56,13 +51,13 @@ impl<V: View> ElementIterator for V {
         1
     }
 
-    fn layout_at(&self, lctx: &mut LayoutContext, available_rect: Rect, index: usize) -> Rect {
+    fn layout_at(&self, lctx: &mut LayoutContext, available_rect: Rect, _index: usize) -> Rect {
         // Rc::get_mut(&mut lctx.path).unwrap().push(0);
         lctx.path.push(0);
 
         let layout = self.layout(lctx, available_rect);
         // get_id_manger_mut().insert(path.clone());
-        get_id_manger_mut().set_layout_content_rect(Vec::clone(&lctx.path).into(), layout);
+        get_id_manger_mut().set_layout_content_rect(Vec::clone(lctx.path), layout);
 
         // Rc::get_mut(&mut lctx.path).unwrap().pop();
         lctx.path.pop();
@@ -70,11 +65,11 @@ impl<V: View> ElementIterator for V {
         layout
     }
 
-    fn draw_at(&self, dctx: DrawingContext, index: usize) {
+    fn draw_at(&self, dctx: DrawingContext, _index: usize) {
         self.draw(dctx)
     }
 
-    fn is_leaf_at(&self, index: usize) -> bool {
+    fn is_leaf_at(&self, _index: usize) -> bool {
         false
     }
 }
@@ -117,9 +112,7 @@ multi_from!(VStack, Multi, 13);
 multi_from!(VStack, Multi, 14);
 
 impl<E: ElementIterator> Element for VStack<E> {
-    fn body(&self) -> impl Element + View {
-        ()
-    }
+    fn body(&self) -> impl Element + View {}
 }
 
 impl<E: ElementIterator> View for VStack<E> {
@@ -128,6 +121,7 @@ impl<E: ElementIterator> View for VStack<E> {
         used_rect.y1 = 0.0;
 
         let mut current_rect = available_rect;
+        let mut max_width = 0.0;
 
         // Rc::get_mut(&mut lctx.path).unwrap().push(0);
         lctx.path.push(0);
@@ -145,17 +139,23 @@ impl<E: ElementIterator> View for VStack<E> {
                 used_rect.y1 += self.spacing * lctx.scale_factor;
                 current_rect.y0 += self.spacing * lctx.scale_factor;
             }
+
+            if layout.width() > max_width {
+                max_width = layout.width()
+            }
         }
+
+        used_rect.x1 = used_rect.x0 + max_width;
 
         // Rc::get_mut(&mut lctx.path).unwrap().pop();
         lctx.path.pop();
 
-        get_id_manger_mut().set_layout_content_rect(Vec::clone(&lctx.path).into(), used_rect);
+        get_id_manger_mut().set_layout_content_rect(Vec::clone(lctx.path), used_rect);
 
         used_rect
     }
 
-    fn draw(&self, mut dctx: DrawingContext) {
+    fn draw(&self, dctx: DrawingContext) {
         // Rc::get_mut(&mut dctx.path).unwrap().push(0);
         dctx.path.borrow_mut().push(0);
 
@@ -171,34 +171,32 @@ impl<E: ElementIterator> View for VStack<E> {
     }
 }
 
-impl Element for Rect {
-    fn body(&self) -> impl Element + View {
-        self.clone()
-    }
-}
+pub struct Rectangle(pub f64, pub f64);
 
-impl View for Rect {
+impl Element for Rectangle {}
+
+impl View for Rectangle {
     fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
         let rect = Rect {
             x0: available_rect.x0,
             y0: available_rect.y0,
-            x1: available_rect.x0 + self.width() * lctx.scale_factor,
-            y1: available_rect.y0 + self.height() * lctx.scale_factor,
+            x1: available_rect.x0 + self.0 * lctx.scale_factor,
+            y1: available_rect.y0 + self.1 * lctx.scale_factor,
         };
 
-        get_id_manger_mut().set_layout_content_rect(Vec::clone(&lctx.path).into(), rect);
+        get_id_manger_mut().set_layout_content_rect(Vec::clone(lctx.path), rect);
 
         rect
     }
 
-    fn draw(&self, mut dctx: DrawingContext) {
+    fn draw(&self, dctx: DrawingContext) {
         let binding = get_id_manger();
         let layout = binding.get_layout(dctx.path.borrow().clone().into());
 
         dctx.builder.borrow_mut().fill(
             vello::peniko::Fill::NonZero,
             Affine::IDENTITY,
-            &dctx.foreground_color,
+            &dctx.fill_brush,
             None,
             &layout.content_bounds,
         );
@@ -225,9 +223,7 @@ pub struct Padding<E: View> {
 }
 
 impl<E: View> Element for Padding<E> {
-    fn body(&self) -> impl Element + View {
-        ()
-    }
+    fn body(&self) -> impl Element + View {}
 }
 
 impl<E: View> View for Padding<E> {
@@ -255,12 +251,12 @@ impl<E: View> View for Padding<E> {
             y1: layout.y1 + edges.y1,
         };
 
-        get_id_manger_mut().set_layout_padding_rect(Vec::clone(&lctx.path).into(), used);
+        get_id_manger_mut().set_layout_padding_rect(Vec::clone(lctx.path), used);
 
         used
     }
 
-    fn draw(&self, mut dctx: DrawingContext) {
+    fn draw(&self, dctx: DrawingContext) {
         let binding = get_id_manger();
         let layout = binding.get_layout(dctx.path.borrow().clone().into());
 
@@ -325,12 +321,12 @@ impl<E: View> View for Border<E> {
             y1: layout.y1 + edges.y1,
         };
 
-        get_id_manger_mut().set_layout_border_rect(Vec::clone(&lctx.path).into(), used);
+        get_id_manger_mut().set_layout_border_rect(Vec::clone(lctx.path), used);
 
         used
     }
 
-    fn draw(&self, mut dctx: DrawingContext) {
+    fn draw(&self, dctx: DrawingContext) {
         let binding = get_id_manger();
         let layout = binding.get_layout(Vec::clone(&dctx.path.borrow()).into());
 
@@ -390,5 +386,254 @@ impl<T: View> BackgroundImpl<T> for T {
             view: self,
             brush: brush.into(),
         }
+    }
+}
+
+pub struct Fill<V: View> {
+    view: V,
+    brush: Brush,
+}
+
+impl<V: View> Element for Fill<V> {}
+
+impl<V: View> View for Fill<V> {
+    fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
+        self.view.layout(lctx, available_rect)
+    }
+
+    fn draw(&self, mut dctx: DrawingContext) {
+        dctx.fill_brush = self.brush.clone();
+
+        self.view.draw(dctx);
+    }
+}
+
+pub trait FillImpl<T: View> {
+    fn fill(self, brush: impl Into<Brush>) -> Fill<T>;
+}
+
+impl<T: View> FillImpl<T> for T {
+    fn fill(self, brush: impl Into<Brush>) -> Fill<T> {
+        Fill {
+            view: self,
+            brush: brush.into(),
+        }
+    }
+}
+
+pub struct ExactFrame<V: View> {
+    view: V,
+    size: Size,
+    alignment: Alignment,
+}
+
+impl<V: View> ExactFrame<V> {
+    pub fn align(self, alignment: Alignment) -> ExactFrame<V> {
+        ExactFrame { alignment, ..self }
+    }
+}
+
+impl<V: View> Element for ExactFrame<V> {}
+
+impl<V: View> View for ExactFrame<V> {
+    fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
+        lctx.path.push(0);
+
+        let ref_rect = self.view.layout(lctx, available_rect);
+        get_id_manger_mut().remove(lctx.path.clone());
+
+        // Adjust the reference rectangle on the vertical axis
+        let ref_rect = match self.alignment.vertical {
+            VerticalALignment::Top => ref_rect,
+            VerticalALignment::Bottom => Rect {
+                y0: available_rect.y0 + self.size.height - ref_rect.height(),
+                y1: available_rect.y0 + self.size.height,
+                ..ref_rect
+            },
+            VerticalALignment::Center => Rect {
+                y0: available_rect.y0 + self.size.height / 2.0 - ref_rect.height() / 2.0,
+                y1: available_rect.y0 + self.size.height / 2.0 + ref_rect.height() / 2.0,
+                ..ref_rect
+            },
+        };
+
+        // Adjust the reference rectangle on the horizontal axis
+        let ref_rect = match self.alignment.horizontal {
+            HorizontalAlignment::Leading => ref_rect,
+            HorizontalAlignment::Trailing => Rect {
+                x0: available_rect.x0 + self.size.width - ref_rect.width(),
+                x1: available_rect.x0 + self.size.width,
+                ..ref_rect
+            },
+            HorizontalAlignment::Center => Rect {
+                x0: available_rect.x0 + self.size.width / 2.0 - ref_rect.width() / 2.0,
+                x1: available_rect.x0 + self.size.width / 2.0 + ref_rect.width() / 2.0,
+                ..ref_rect
+            },
+        };
+
+        // Laying out the child again so it's layouts are updated
+        self.view.layout(lctx, ref_rect);
+
+        lctx.path.pop();
+
+        let used_rect = Rect {
+            x1: available_rect.x0 + self.size.width,
+            y1: available_rect.y0 + self.size.height,
+            ..available_rect
+        };
+
+        get_id_manger_mut().set_layout_content_rect(lctx.path.clone(), used_rect);
+
+        used_rect
+    }
+
+    fn draw(&self, dctx: DrawingContext) {
+        dctx.path.borrow_mut().push(0);
+
+        self.view.draw(dctx);
+    }
+}
+
+pub struct LoseFrame<V: View> {
+    view: V,
+    min_size: Size,
+    max_size: Size,
+    alignment: Alignment,
+}
+
+impl<V: View> LoseFrame<V> {
+    pub fn align(self, alignment: Alignment) -> LoseFrame<V> {
+        LoseFrame { alignment, ..self }
+    }
+}
+
+impl<V: View> Element for LoseFrame<V> {}
+
+impl<V: View> View for LoseFrame<V> {
+    fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
+        let size = available_rect.size().clamp(self.min_size, self.max_size);
+
+        lctx.path.push(0);
+
+        let ref_rect = self.view.layout(lctx, available_rect);
+
+        // Adjust the reference rectangle on the vertical axis
+        let ref_rect = match self.alignment.vertical {
+            VerticalALignment::Top => ref_rect,
+            VerticalALignment::Bottom => Rect {
+                y0: available_rect.y0 + size.height - ref_rect.height(),
+                y1: available_rect.y0 + size.height,
+                ..ref_rect
+            },
+            VerticalALignment::Center => Rect {
+                y0: available_rect.y0 + size.height / 2.0 - ref_rect.height() / 2.0,
+                y1: available_rect.y0 + size.height / 2.0 + ref_rect.height() / 2.0,
+                ..ref_rect
+            },
+        };
+
+        // Adjust the reference rectangle on the horizontal axis
+        let ref_rect = match self.alignment.horizontal {
+            HorizontalAlignment::Leading => ref_rect,
+            HorizontalAlignment::Trailing => Rect {
+                x0: available_rect.x0 + size.width - ref_rect.width(),
+                x1: available_rect.x0 + size.width,
+                ..ref_rect
+            },
+            HorizontalAlignment::Center => Rect {
+                x0: available_rect.x0 + size.width / 2.0 - ref_rect.width() / 2.0,
+                x1: available_rect.x0 + size.width / 2.0 + ref_rect.width() / 2.0,
+                ..ref_rect
+            },
+        };
+
+        // Laying out the child again so it's layouts are updated
+        get_id_manger_mut().remove(lctx.path.clone());
+        self.view.layout(lctx, ref_rect);
+
+        lctx.path.pop();
+
+        let used_rect = Rect {
+            x1: available_rect.x0 + size.width,
+            y1: available_rect.y0 + size.height,
+            ..available_rect
+        };
+
+        get_id_manger_mut().set_layout_content_rect(lctx.path.clone(), used_rect);
+
+        used_rect
+    }
+
+    fn draw(&self, dctx: DrawingContext) {
+        dctx.path.borrow_mut().push(0);
+
+        self.view.draw(dctx);
+    }
+}
+
+pub trait FrameImpl<T: View> {
+    fn frame(self, size: impl Into<Size>) -> ExactFrame<T>;
+    fn frame_min_max(self, min: impl Into<Size>, max: impl Into<Size>) -> LoseFrame<T>;
+}
+
+impl<T: View> FrameImpl<T> for T {
+    fn frame(self, size: impl Into<Size>) -> ExactFrame<T> {
+        ExactFrame {
+            view: self,
+            size: size.into(),
+            alignment: Alignment::default(),
+        }
+    }
+
+    fn frame_min_max(self, min: impl Into<Size>, max: impl Into<Size>) -> LoseFrame<T> {
+        LoseFrame {
+            view: self,
+            min_size: min.into(),
+            max_size: max.into(),
+            alignment: Alignment::default(),
+        }
+    }
+}
+
+pub struct Text(String);
+
+impl Text {
+    pub fn new(text: impl Into<String>) -> Text {
+        Text(text.into())
+    }
+}
+
+impl Element for Text {}
+
+impl View for Text {
+    fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
+        let rect = lctx.font_manager.borrow().layout(
+            None,
+            20.0,
+            lctx.scale_factor as _,
+            available_rect,
+            &self.0,
+        );
+
+        get_id_manger_mut().set_layout_content_rect(lctx.path.clone(), rect);
+
+        rect
+    }
+
+    fn draw(&self, dctx: DrawingContext) {
+        let binding = get_id_manger();
+        let rect = binding.get_layout(dctx.path.borrow_mut().clone().into());
+
+        dctx.font_manager.borrow_mut().add(
+            &mut dctx.builder.borrow_mut(),
+            None,
+            20.0,
+            dctx.scale_factor as _,
+            Some(&dctx.foreground_color),
+            Affine::IDENTITY,
+            &self.0,
+            rect.content_bounds,
+        );
     }
 }

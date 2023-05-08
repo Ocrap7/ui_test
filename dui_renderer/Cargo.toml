@@ -13,3 +13,5 @@ pollster = "0.3.0"
 
 dui_core = { path = '../dui_core' }
 dui_util = { path = '../dui_util' }
+tokio = { version = "1.28.0", features = ["full"] }
+wgpu-hal = "0.16.0"

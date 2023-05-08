@@ -1,14 +1,20 @@
+
+
 use std::rc::Rc;
 
 use dui_util::Rf;
-use vello::{kurbo::Rect, peniko::{Color, Brush}, SceneBuilder};
+use vello::{kurbo::Rect, peniko::{Brush}, SceneBuilder};
 
-use crate::{view::{Element, View, ElementIterator}, layout::{get_id_manger_mut, get_id_manger}};
+use crate::simple_text::FontManager;
+
+
 
 #[derive(Clone)]
 pub struct DrawingContext<'a> {
     pub builder: Rf<SceneBuilder<'a>>,
     pub path: Rf<Vec<u32>>,
+
+    pub font_manager: Rf<FontManager>,
 
     pub background_brush: Brush,
     pub fill_brush: Brush,
@@ -22,6 +28,7 @@ pub struct DrawingContext<'a> {
 
 #[derive(Debug)]
 pub struct LayoutContext<'a> {
+    pub font_manager: Rf<FontManager>,
     // pub path: Rc<Vec<u32>>,
     pub path: &'a mut Vec<u32>,
     pub scale_factor: f64,

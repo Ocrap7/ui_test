@@ -58,7 +58,12 @@ impl IdManager {
         self.id_mappings.insert(id.into(), Layout::default());
     }
 
-    pub fn set_layout_padding_rect(&mut self, id: Id, layout: Rect) -> Option<Layout> {
+    pub fn remove(&mut self, id: impl Into<Id>) {
+        self.id_mappings.remove(&id.into());
+    }
+
+    pub fn set_layout_padding_rect(&mut self, id: impl Into<Id>, layout: Rect) -> Option<Layout> {
+        let id = id.into();
         if let Some(full) = self.id_mappings.get_mut(&id) {
             full.padding_bounds = layout;
             None
@@ -74,13 +79,14 @@ impl IdManager {
         }
     }
 
-    pub fn set_layout_border_rect(&mut self, id: Id, layout: Rect) -> Option<Layout> {
+    pub fn set_layout_border_rect(&mut self, id: impl Into<Id>, layout: Rect) -> Option<Layout> {
+        let id = id.into();
         if let Some(full) = self.id_mappings.get_mut(&id) {
             full.border_bounds = layout;
             None
         } else {
             self.id_mappings.insert(
-                id,
+                id.into(),
                 Layout {
                     padding_bounds: layout,
                     border_bounds: layout,
@@ -90,7 +96,8 @@ impl IdManager {
         }
     }
 
-    pub fn set_layout_content_rect(&mut self, id: Id, layout: Rect) -> Option<Layout> {
+    pub fn set_layout_content_rect(&mut self, id: impl Into<Id>, layout: Rect) -> Option<Layout> {
+        let id = id.into();
         if let Some(full) = self.id_mappings.get_mut(&id) {
             full.content_bounds = layout;
             None
