@@ -5,7 +5,7 @@ use vello::fello::raw::FontRef;
 use vello::fello::MetadataProvider;
 use vello::glyph::{Glyph, GlyphContext};
 use vello::kurbo::{Affine, Rect};
-use vello::peniko::{Blob, BrushRef, Color, Font, StyleRef};
+use vello::peniko::{Blob, BrushRef, Font, StyleRef};
 use vello::{peniko::Brush, SceneBuilder};
 
 // This is very much a hack to get things working.
@@ -326,7 +326,7 @@ impl FontManager {
                     }
                     let gid = charmap.map(ch).unwrap_or_default();
                     let advance = glyph_metrics.advance_width(gid).unwrap_or_default();
-                    let x = pen_x as f32;
+                    let x = pen_x;
                     pen_x += advance;
                     Some(Glyph {
                         id: gid.to_u16() as u32,
@@ -349,8 +349,7 @@ impl FontManager {
         let default_font = self.fonts.get("opensans").unwrap();
         // let default_font = FontRef::new(ROBOTO_FONT).unwrap();
         let font = font
-            .map(|font| to_font_ref(font))
-            .flatten()
+            .and_then(to_font_ref)
             .unwrap_or(to_font_ref(default_font).unwrap());
 
         let fello_size = vello::fello::Size::new(size * scale);
@@ -434,8 +433,7 @@ impl FontManager {
         let default_font = self.fonts.get("opensans").unwrap();
         // let default_font = FontRef::new(ROBOTO_FONT).unwrap();
         let font = font
-            .map(|font| to_font_ref(font))
-            .flatten()
+            .and_then(to_font_ref)
             .unwrap_or(to_font_ref(default_font).unwrap());
 
         let fello_size = vello::fello::Size::new(size * scale);
@@ -502,7 +500,7 @@ impl FontManager {
     }
 }
 
-fn to_font_ref<'a>(font: &'a Font) -> Option<FontRef<'a>> {
+fn to_font_ref(font: &Font) -> Option<FontRef<'_>> {
     use vello::fello::raw::FileRef;
     let file_ref = FileRef::new(font.data.as_ref()).ok()?;
     match file_ref {

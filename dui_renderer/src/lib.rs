@@ -1,14 +1,13 @@
 #![feature(return_position_impl_trait_in_trait)]
 
-use std::rc::Rc;
+
 
 use dui_core::{
     layout::get_id_manger,
     simple_text::FontManager,
     view::{
-        BackgroundImpl, BorderImpl, Element, FrameImpl, PaddingImpl, Rectangle, Text, VStack, View, Multi2,
+        BackgroundImpl, Element, FrameImpl, PaddingImpl, Text, VStack, View,
     },
-    Alignment,
 };
 use dui_util::Rf;
 use vello::{

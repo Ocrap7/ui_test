@@ -53,7 +53,7 @@ pub struct LayoutPathPusher<'a>(&'a mut Vec<u32>);
 
 impl <'a> LayoutPathPusher<'a> {
     pub fn new(dctx: &'a mut LayoutContext) -> LayoutPathPusher<'a> {
-        LayoutPathPusher(&mut dctx.path)
+        LayoutPathPusher(dctx.path)
     }
 
     pub fn set_last(&mut self, index: u32) {

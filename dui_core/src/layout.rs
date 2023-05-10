@@ -86,7 +86,7 @@ impl IdManager {
             None
         } else {
             self.id_mappings.insert(
-                id.into(),
+                id,
                 Layout {
                     padding_bounds: layout,
                     border_bounds: layout,
