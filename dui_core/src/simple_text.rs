@@ -5,12 +5,13 @@ use vello::fello::raw::FontRef;
 use vello::fello::MetadataProvider;
 use vello::glyph::{Glyph, GlyphContext};
 use vello::kurbo::{Affine, Rect};
-use vello::peniko::{Blob, BrushRef, Font, StyleRef};
+use vello::peniko::{Blob, BrushRef, Color, Font, StyleRef};
 use vello::{peniko::Brush, SceneBuilder};
 
 // This is very much a hack to get things working.
 // On Windows, can set this to "c:\\Windows\\Fonts\\seguiemj.ttf" to get color emoji
-const OPEN_SANS_DATA: &[u8] = include_bytes!("../../res/fonts/Open_Sans/static/OpenSans-Regular.ttf");
+const OPEN_SANS_DATA: &[u8] =
+    include_bytes!("../../res/fonts/Open_Sans/static/OpenSans-Regular.ttf");
 // const OPEN_SANS_DATA: &[u8] = include_bytes!("../../res/fonts/Open_Sans/OpenSans-VariableFont.ttf");
 
 pub struct FontManager {
@@ -405,7 +406,7 @@ impl FontManager {
                 continue;
             }
 
-            pen_x += advance.ceil();
+            pen_x += advance;
 
             if pen_x > max_x {
                 max_x = pen_x
@@ -416,7 +417,7 @@ impl FontManager {
             max_x = bounds.width();
         }
 
-        Rect::from_origin_size(bounds.origin(), (max_x, pen_y))
+        Rect::from_origin_size(bounds.origin(), (max_x.ceil(), (pen_y + line_height as f64).ceil()))
     }
 
     pub fn add(
@@ -460,7 +461,9 @@ impl FontManager {
         let mut word_index = 0;
 
         let vars: [(&str, f32); 0] = [];
-        let mut provider = self.gcx.new_provider(&font, None, size * scale, false, vars);
+        let mut provider = self
+            .gcx
+            .new_provider(&font, None, size * scale, false, vars);
 
         for ch in text.chars() {
             if ch == '\n' {
@@ -487,12 +490,14 @@ impl FontManager {
 
             if let Some(glyph) = provider.get(gid.to_u16(), brush) {
                 let xform = transform
-                    * Affine::translate((pen_x, (metrics.ascent * scale) as f64 + pen_y))
+                    * Affine::translate((bounds.x0, bounds.y0 + metrics.ascent as f64))
+                    * Affine::translate((pen_x, pen_y))
                     * Affine::scale_non_uniform(1.0, -1.0);
+              
                 builder.append(&glyph, Some(xform));
             }
 
-            pen_x += advance.ceil();
+            pen_x += advance;
         }
     }
 }

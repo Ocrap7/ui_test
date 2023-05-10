@@ -53,15 +53,14 @@ impl<V: View> ElementIterator for V {
 
     fn layout_at(&self, lctx: &mut LayoutContext, available_rect: Rect, _index: usize) -> Rect {
         // Rc::get_mut(&mut lctx.path).unwrap().push(0);
-        lctx.path.push(0);
+        // lctx.path.push(0);
+        let _ = lctx.push();
 
         let layout = self.layout(lctx, available_rect);
         // get_id_manger_mut().insert(path.clone());
-        get_id_manger_mut().set_layout_content_rect(Vec::clone(lctx.path), layout);
+        get_id_manger_mut().set_layout_content_rect(lctx.id(), layout);
 
         // Rc::get_mut(&mut lctx.path).unwrap().pop();
-        lctx.path.pop();
-
         layout
     }
 
@@ -97,6 +96,15 @@ impl<E: ElementIterator> VStack<E> {
         }
     }
 }
+
+// impl<E: Element + View> From<E> for VStack<Multi1<E>> {
+//     fn from(value: E) -> Self {
+//         VStack {
+//             spacing: DEFAULT_SPACING,
+//             element: Multi1::from(value),
+//         }
+//     }
+// }
 
 multi_from!(VStack, Multi, 2);
 multi_from!(VStack, Multi, 3);
@@ -157,17 +165,16 @@ impl<E: ElementIterator> View for VStack<E> {
 
     fn draw(&self, dctx: DrawingContext) {
         // Rc::get_mut(&mut dctx.path).unwrap().push(0);
-        dctx.path.borrow_mut().push(0);
+        let pushed = dctx.push();
 
         for i in 0..self.element.len() {
             // *Rc::get_mut(&mut dctx.path).unwrap().last_mut().unwrap() = i as u32;
-            *dctx.path.borrow_mut().last_mut().unwrap() = i as u32;
+            pushed.set_last(i as u32);
 
             self.element.draw_at(dctx.clone(), i)
         }
 
         // Rc::get_mut(&mut dctx.path).unwrap().pop();
-        dctx.path.borrow_mut().pop();
     }
 }
 
@@ -191,7 +198,7 @@ impl View for Rectangle {
 
     fn draw(&self, dctx: DrawingContext) {
         let binding = get_id_manger();
-        let layout = binding.get_layout(dctx.path.borrow().clone().into());
+        let layout = binding.get_layout(dctx.id());
 
         dctx.builder.borrow_mut().fill(
             vello::peniko::Fill::NonZero,
@@ -202,6 +209,42 @@ impl View for Rectangle {
         );
     }
 }
+
+// pub struct Multi1<E0: Element + View>(E0);
+
+// impl<E0: Element + View> ElementIterator for Multi1<E0> {
+//     fn len(&self) -> usize {
+//         1
+//     }
+
+//     fn layout_at(&self, lctx: &mut LayoutContext, available_rect: Rect, index: usize) -> Rect {
+//         let layout = match index {
+//             0 => self.0.layout(lctx, available_rect),
+//             _ => panic!("Expected a length of 1"),
+//         };
+//         layout
+//     }
+
+//     fn draw_at(&self, dctx: DrawingContext, index: usize) {
+//         match index {
+//             0 => self.0.draw(dctx),
+//             _ => panic!("Expected a length of 1"),
+//         }
+//     }
+
+//     fn is_leaf_at(&self, index: usize) -> bool {
+//         match index {
+//             0 => self.0.is_leaf(),
+//             _ => panic!("Expected a length of 1"),
+//         }
+//     }
+// }
+
+// impl<E0: Element + View> From<E0> for Multi1<E0> {
+//     fn from(value: E0) -> Multi1<E0> {
+//         Multi1(value)
+//     }
+// }
 
 multi!(Multi, 2);
 multi!(Multi, 3);
@@ -228,6 +271,9 @@ impl<E: View> Element for Padding<E> {
 
 impl<E: View> View for Padding<E> {
     fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
+        // Push path for child
+        lctx.path.push(0);
+
         let edges = Insets {
             x0: self.edges.x0 * lctx.scale_factor,
             y0: self.edges.y0 * lctx.scale_factor,
@@ -251,22 +297,26 @@ impl<E: View> View for Padding<E> {
             y1: layout.y1 + edges.y1,
         };
 
-        get_id_manger_mut().set_layout_padding_rect(Vec::clone(lctx.path), used);
+        lctx.path.pop();
+
+        get_id_manger_mut().set_layout_content_rect(lctx.id(), used);
 
         used
     }
 
     fn draw(&self, dctx: DrawingContext) {
         let binding = get_id_manger();
-        let layout = binding.get_layout(dctx.path.borrow().clone().into());
+        let layout = binding.get_layout(dctx.id());
 
         dctx.builder.borrow_mut().fill(
             vello::peniko::Fill::NonZero,
             Affine::IDENTITY,
             &dctx.background_brush,
             None,
-            &layout.padding_bounds,
+            &layout.content_bounds,
         );
+
+        let _pushed = dctx.push();
 
         self.element.draw(dctx);
     }
@@ -489,7 +539,7 @@ impl<V: View> View for ExactFrame<V> {
     }
 
     fn draw(&self, dctx: DrawingContext) {
-        dctx.path.borrow_mut().push(0);
+        let _pushed = dctx.push();
 
         self.view.draw(dctx);
     }
@@ -548,6 +598,8 @@ impl<V: View> View for LoseFrame<V> {
             },
         };
 
+        let ref_rect = ref_rect.round();
+
         // Laying out the child again so it's layouts are updated
         get_id_manger_mut().remove(lctx.path.clone());
         self.view.layout(lctx, ref_rect);
@@ -566,7 +618,7 @@ impl<V: View> View for LoseFrame<V> {
     }
 
     fn draw(&self, dctx: DrawingContext) {
-        dctx.path.borrow_mut().push(0);
+        let _pushed = dctx.push();
 
         self.view.draw(dctx);
     }
@@ -616,6 +668,7 @@ impl View for Text {
             &self.0,
         );
 
+        println!("{:?}", rect);
         get_id_manger_mut().set_layout_content_rect(lctx.path.clone(), rect);
 
         rect
@@ -623,7 +676,15 @@ impl View for Text {
 
     fn draw(&self, dctx: DrawingContext) {
         let binding = get_id_manger();
-        let rect = binding.get_layout(dctx.path.borrow_mut().clone().into());
+        let rect = binding.get_layout(dctx.id());
+
+        dctx.builder.borrow_mut().fill(
+            vello::peniko::Fill::NonZero,
+            Affine::IDENTITY,
+            &dctx.background_brush,
+            None,
+            &rect.content_bounds,
+        );
 
         dctx.font_manager.borrow_mut().add(
             &mut dctx.builder.borrow_mut(),

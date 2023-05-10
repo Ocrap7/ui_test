@@ -3,8 +3,11 @@
 use std::rc::Rc;
 
 use dui_core::{
+    layout::get_id_manger,
     simple_text::FontManager,
-    view::{Element, FrameImpl, Rectangle, View, Text, BorderImpl},
+    view::{
+        BackgroundImpl, BorderImpl, Element, FrameImpl, PaddingImpl, Rectangle, Text, VStack, View, Multi2,
+    },
     Alignment,
 };
 use dui_util::Rf;
@@ -42,12 +45,20 @@ struct MyView;
 
 impl Element for MyView {
     fn body(&self) -> impl View {
-        Text::new("Hello World")
-            .border(3.0, Color::RED)
-            .frame_min_max((100.0, 100.0), (5000.0, 5000.0))
+        VStack::from((
 
-        // Rectangle(100.0, 100.0)
-        //     .align(Alignment::BOTTOM_TRAILING)
+            Text::new("Hello World")
+                .background(Color::GREEN)
+                .padding(5.0)
+                .background(Color::RED),
+
+            Text::new("Hello World")
+                .background(Color::GREEN)
+                .padding(5.0)
+                .background(Color::RED),
+
+        ))
+        .frame_min_max((100.0, 100.0), (5000.0, 5000.0))
     }
 }
 
@@ -173,7 +184,7 @@ pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderCont
 
                 m.view().draw(dctx);
 
-                // println!("{:#?}", get_id_manger());
+                println!("{:#?}", get_id_manger());
 
                 let params = RenderParams {
                     width: state.size.width,
