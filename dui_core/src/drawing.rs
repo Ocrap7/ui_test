@@ -1,13 +1,25 @@
-
-
-use std::rc::Rc;
-
 use dui_util::Rf;
-use vello::{kurbo::Rect, peniko::{Brush}, SceneBuilder};
+use vello::{kurbo::Rect, peniko::Brush, SceneBuilder};
 
-use crate::simple_text::FontManager;
+use crate::{layout::Id, simple_text::FontManager};
 
+pub struct PathPusher(Rf<Vec<u32>>);
 
+impl PathPusher {
+    pub fn new(dctx: &DrawingContext) -> PathPusher {
+        PathPusher(dctx.path.clone())
+    }
+
+    pub fn set_last(&self, index: u32) {
+        *self.0.borrow_mut().last_mut().unwrap() = index;
+    }
+}
+
+impl Drop for PathPusher {
+    fn drop(&mut self) {
+        self.0.borrow_mut().pop();
+    }
+}
 
 #[derive(Clone)]
 pub struct DrawingContext<'a> {
@@ -26,6 +38,35 @@ pub struct DrawingContext<'a> {
     pub scale_factor: f64,
 }
 
+impl DrawingContext<'_> {
+    pub fn push(&self) -> PathPusher {
+        self.path.borrow_mut().push(0);
+        PathPusher::new(self)
+    }
+
+    pub fn id(&self) -> Id {
+        self.path.borrow().clone().into()
+    }
+}
+
+pub struct LayoutPathPusher<'a>(&'a mut Vec<u32>);
+
+impl <'a> LayoutPathPusher<'a> {
+    pub fn new(dctx: &'a mut LayoutContext) -> LayoutPathPusher<'a> {
+        LayoutPathPusher(&mut dctx.path)
+    }
+
+    pub fn set_last(&mut self, index: u32) {
+        *self.0.last_mut().unwrap() = index;
+    }
+}
+
+impl Drop for LayoutPathPusher<'_> {
+    fn drop(&mut self) {
+        self.0.pop();
+    }
+}
+
 #[derive(Debug)]
 pub struct LayoutContext<'a> {
     pub font_manager: Rf<FontManager>,
@@ -34,59 +75,12 @@ pub struct LayoutContext<'a> {
     pub scale_factor: f64,
 }
 
-// pub fn layout(mut dctx: DrawingContext<'_>, view: impl Element, index: u32) {
+impl LayoutContext<'_> {
+    pub fn push(&mut self) -> LayoutPathPusher {
+        LayoutPathPusher::new(self)
+    }
 
-//     Rc::make_mut(&mut dctx.path).push(index);
-//     if view.is_leaf() { return }
-// }
-
-// pub fn layout_iter(mut dctx: DrawingContext<'_>, view: impl ElementIterator, index: u32) {
-//     for i in 0..view.len() {
-//         if !view.is_leaf_at(i) {
-//             view.l
-//         }
-//     }
-
-//     Rc::make_mut(&mut dctx.path).push(index);
-//     if view.is_leaf() { return }
-// }
-
-// pub fn draw(mut dctx: DrawingContext<'_>, view: impl Element, index: u32) {
-//     if view.is_leaf() { return }
-
-//     Rc::make_mut(&mut dctx.path).push(index);
-
-//     get_id_manger_mut().insert(Vec::clone(&dctx.path));
-
-//     let layout = view.view().layout(dctx.bounding);
-//     // get_id_manger_mut().set_layout_full_rect(id, layout);
-
-//     dctx.bounding = layout;
-
-//     view.view().draw(&mut dctx);
-
-//     draw(dctx.clone(), view.body(), 0);
-
-//     Rc::make_mut(&mut dctx.path).pop();
-// }
-
-// pub fn draw_iter(mut dctx: DrawingContext<'_>, view: impl ElementIterator, index: u32) {
-//     for i in 0..view.len() {
-//         get_id_manger().get_layout(id)
-//     }
-//     if view.is_leaf() { return }
-
-//     Rc::make_mut(&mut dctx.path).push(index);
-
-//     let layout = view.view().layout(dctx.bounding);
-//     // get_id_manger_mut().set_layout_full_rect(id, layout);
-
-//     dctx.bounding = layout;
-
-//     view.view().draw(&mut dctx);
-
-//     draw(dctx.clone(), view.body(), 0);
-
-//     Rc::make_mut(&mut dctx.path).pop();
-// }
-
+    pub fn id(&self) -> Id {
+        self.path.clone().into()
+    }
+}
