@@ -6,8 +6,8 @@ use dui_core::{
     layout::get_id_manger,
     simple_text::FontManager,
     view::{
-        BackgroundImpl, Element, FrameImpl, PaddingImpl, Text, VStack, View,
-    },
+        BackgroundImpl, Element, FrameImpl, PaddingImpl, Text, HStack, View,
+    }, Alignment, platform::{get_color, set_blur},
 };
 use dui_util::Rf;
 use vello::{
@@ -44,7 +44,7 @@ struct MyView;
 
 impl Element for MyView {
     fn body(&self) -> impl View {
-        VStack::from((
+        HStack::from((
 
             Text::new("Hello World")
                 .background(Color::GREEN)
@@ -57,7 +57,9 @@ impl Element for MyView {
                 .background(Color::RED),
 
         ))
+        .padding(1.0)
         .frame_min_max((100.0, 100.0), (5000.0, 5000.0))
+        .align(Alignment::TOP_LEADING)
     }
 }
 
@@ -66,6 +68,8 @@ impl MyView {}
 pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderContext) {
     let mut scene = Scene::new();
     let mut state: Option<RenderState> = None;
+
+    set_blur(&window);
 
     window.request_redraw();
     window.focus_window();
@@ -136,7 +140,7 @@ pub fn run(event_loop: EventLoop<()>, window: Window, mut render_ctx: RenderCont
                 scene_builder.fill(
                     vello::peniko::Fill::NonZero,
                     Affine::IDENTITY,
-                    &Brush::Solid(Color::AQUA),
+                    &Brush::Solid(get_color()),
                     None,
                     &Rect::from_origin_size(
                         (0.0, 0.0),

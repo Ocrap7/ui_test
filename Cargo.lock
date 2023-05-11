@@ -204,6 +204,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
 
 [[package]]
+name = "cacao"
+version = "0.3.2"
+source = "git+https://github.com/ryanmcgrath/cacao.git#9628498c0682937ae60fbe938dce6a7e08d43f42"
+dependencies = [
+ "block",
+ "core-foundation 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-graphics 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "dispatch",
+ "lazy_static",
+ "libc",
+ "objc",
+ "objc_id",
+ "os_info",
+ "url",
+]
+
+[[package]]
 name = "calloop"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -238,6 +255,66 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
+name = "cocoa"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f425db7937052c684daec3bd6375c8abe2d146dca4b8b143d6db777c39138f3a"
+dependencies = [
+ "bitflags 1.3.2",
+ "block",
+ "cocoa-foundation 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-foundation 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-graphics 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "foreign-types",
+ "libc",
+ "objc",
+]
+
+[[package]]
+name = "cocoa"
+version = "0.24.1"
+source = "git+https://github.com/servo/core-foundation-rs.git?branch=master#75f424f81a7a7671158e6fcd3fbe30a27f048381"
+dependencies = [
+ "bitflags 1.3.2",
+ "block",
+ "cocoa-foundation 0.1.1 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
+ "core-foundation 0.9.3 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
+ "core-graphics 0.22.3 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
+ "foreign-types",
+ "libc",
+ "objc",
+]
+
+[[package]]
+name = "cocoa-foundation"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "931d3837c286f56e3c58423ce4eba12d08db2374461a785c86f672b08b5650d6"
+dependencies = [
+ "bitflags 1.3.2",
+ "block",
+ "core-foundation 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-graphics-types 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "foreign-types",
+ "libc",
+ "objc",
+]
+
+[[package]]
+name = "cocoa-foundation"
+version = "0.1.1"
+source = "git+https://github.com/servo/core-foundation-rs.git?branch=master#75f424f81a7a7671158e6fcd3fbe30a27f048381"
+dependencies = [
+ "bitflags 1.3.2",
+ "block",
+ "core-foundation 0.9.3 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
+ "core-graphics-types 0.1.1 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
+ "foreign-types",
+ "libc",
+ "objc",
+]
+
+[[package]]
 name = "codespan-reporting"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -259,7 +336,16 @@ version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "194a7a9e6de53fa55116934067c844d9d749312f75c6f6d0980e8c252f8c2146"
 dependencies = [
- "core-foundation-sys",
+ "core-foundation-sys 0.8.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc",
+]
+
+[[package]]
+name = "core-foundation"
+version = "0.9.3"
+source = "git+https://github.com/servo/core-foundation-rs.git?branch=master#75f424f81a7a7671158e6fcd3fbe30a27f048381"
+dependencies = [
+ "core-foundation-sys 0.8.4 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
  "libc",
 ]
 
@@ -270,14 +356,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e496a50fda8aacccc86d7529e2c1e0892dbd0f898a6b5645b5561b89c3210efa"
 
 [[package]]
+name = "core-foundation-sys"
+version = "0.8.4"
+source = "git+https://github.com/servo/core-foundation-rs.git?branch=master#75f424f81a7a7671158e6fcd3fbe30a27f048381"
+
+[[package]]
 name = "core-graphics"
 version = "0.22.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2581bbab3b8ffc6fcbd550bf46c355135d16e9ff2a6ea032ad6b9bf1d7efe4fb"
 dependencies = [
  "bitflags 1.3.2",
- "core-foundation",
- "core-graphics-types",
+ "core-foundation 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-graphics-types 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "foreign-types",
+ "libc",
+]
+
+[[package]]
+name = "core-graphics"
+version = "0.22.3"
+source = "git+https://github.com/servo/core-foundation-rs.git?branch=master#75f424f81a7a7671158e6fcd3fbe30a27f048381"
+dependencies = [
+ "bitflags 1.3.2",
+ "core-foundation 0.9.3 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
+ "core-graphics-types 0.1.1 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
  "foreign-types",
  "libc",
 ]
@@ -289,7 +392,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a68b68b3446082644c91ac778bf50cd4104bfb002b5a6a7c44cca5a2c70788b"
 dependencies = [
  "bitflags 1.3.2",
- "core-foundation",
+ "core-foundation 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "foreign-types",
+ "libc",
+]
+
+[[package]]
+name = "core-graphics-types"
+version = "0.1.1"
+source = "git+https://github.com/servo/core-foundation-rs.git?branch=master#75f424f81a7a7671158e6fcd3fbe30a27f048381"
+dependencies = [
+ "bitflags 1.3.2",
+ "core-foundation 0.9.3 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
  "foreign-types",
  "libc",
 ]
@@ -339,10 +453,14 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 name = "dui_core"
 version = "0.1.0"
 dependencies = [
+ "cacao",
+ "cocoa 0.24.1 (git+https://github.com/servo/core-foundation-rs.git?branch=master)",
  "dui_macros",
  "dui_util",
  "lazy_static",
+ "objc",
  "rand",
+ "raw-window-handle",
  "vello",
 ]
 
@@ -359,9 +477,11 @@ dependencies = [
 name = "dui_renderer"
 version = "0.1.0"
 dependencies = [
+ "cocoa 0.24.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "dui_core",
  "dui_util",
  "pollster",
+ "raw-window-handle",
  "tokio",
  "vello",
  "wgpu",
@@ -431,6 +551,15 @@ name = "foreign-types-shared"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
+
+[[package]]
+name = "form_urlencoded"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9c384f161156f5260c24a097c56119f9be8c798586aecc13afbcbe7b7e26bf8"
+dependencies = [
+ "percent-encoding",
+]
 
 [[package]]
 name = "futures-core"
@@ -578,6 +707,16 @@ name = "hexf-parse"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df"
+
+[[package]]
+name = "idna"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e14ddfc70884202db2244c223200c204c2bda1bc6e0998d11b5e024d657209e6"
+dependencies = [
+ "unicode-bidi",
+ "unicode-normalization",
+]
 
 [[package]]
 name = "indexmap"
@@ -743,7 +882,7 @@ checksum = "de11355d1f6781482d027a3b4d4de7825dcedb197bf573e0596d00008402d060"
 dependencies = [
  "bitflags 1.3.2",
  "block",
- "core-graphics-types",
+ "core-graphics-types 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "foreign-types",
  "log",
  "objc",
@@ -956,6 +1095,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "objc_id"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c92d4ddb4bd7b50d730c215ff871754d0da6b2178849f8a2a2ab69712d0c073b"
+dependencies = [
+ "objc",
+]
+
+[[package]]
 name = "object"
 version = "0.30.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -977,6 +1125,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "221d488cd70617f1bd599ed8ceb659df2147d9393717954d82a0f5e8032a6ab1"
 dependencies = [
  "redox_syscall 0.3.5",
+]
+
+[[package]]
+name = "os_info"
+version = "3.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "006e42d5b888366f1880eda20371fedde764ed2213dc8496f49622fa0c99cd5e"
+dependencies = [
+ "log",
+ "serde",
+ "winapi",
 ]
 
 [[package]]
@@ -1217,6 +1376,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde"
+version = "1.0.162"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71b2f6e1ab5c2b98c05f0f35b236b22e8df7ead6ffbf51d7808da7f8817e7ab6"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.162"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2a0814352fd64b58489904a44ea8d90cb1a91dcb6b4f5ebabc32c8318e93cb6"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.15",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1380,6 +1559,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tinyvec"
+version = "1.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87cc5ceb3875bb20c2890005a4e226a4651264a5c75edb2421b52861a0a0cb50"
+dependencies = [
+ "tinyvec_macros",
+]
+
+[[package]]
+name = "tinyvec_macros"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+
+[[package]]
 name = "tokio"
 version = "1.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1433,10 +1627,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "44dcf002ae3b32cd25400d6df128c5babec3927cd1eb7ce813cfff20eb6c3746"
 
 [[package]]
+name = "unicode-bidi"
+version = "0.3.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92888ba5573ff080736b3648696b70cafad7d250551175acbaa4e0385b3e1460"
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5464a87b239f13a63a501f2701565754bae92d243d4bb7eb12f6d57d2269bf4"
+
+[[package]]
+name = "unicode-normalization"
+version = "0.1.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c5713f0fc4b5db668a2ac63cdb7bb4469d8c9fed047b1d0292cc7b0ce2ba921"
+dependencies = [
+ "tinyvec",
+]
 
 [[package]]
 name = "unicode-width"
@@ -1451,6 +1660,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
 
 [[package]]
+name = "url"
+version = "2.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0d68c799ae75762b8c3fe375feb6600ef5602c883c5d21eb51c09f22b83c4643"
+dependencies = [
+ "form_urlencoded",
+ "idna",
+ "percent-encoding",
+]
+
+[[package]]
 name = "vec_map"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1459,7 +1679,6 @@ checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 [[package]]
 name = "vello"
 version = "0.0.1"
-source = "git+https://github.com/linebender/vello.git#299b47ea064ec3132e294acd9cf243eea7d9ee51"
 dependencies = [
  "bytemuck",
  "fello",
@@ -1475,7 +1694,6 @@ dependencies = [
 [[package]]
 name = "vello_encoding"
 version = "0.1.0"
-source = "git+https://github.com/linebender/vello.git#299b47ea064ec3132e294acd9cf243eea7d9ee51"
 dependencies = [
  "bytemuck",
  "fello",
@@ -1703,7 +1921,7 @@ dependencies = [
  "bit-set",
  "bitflags 2.2.1",
  "block",
- "core-graphics-types",
+ "core-graphics-types 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "d3d12",
  "foreign-types",
  "glow",
@@ -1931,8 +2149,8 @@ dependencies = [
  "android-activity",
  "bitflags 1.3.2",
  "cfg_aliases",
- "core-foundation",
- "core-graphics",
+ "core-foundation 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-graphics 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "dispatch",
  "instant",
  "libc",

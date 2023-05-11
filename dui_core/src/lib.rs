@@ -6,6 +6,7 @@ pub mod drawing;
 pub mod layout;
 pub mod view;
 pub mod simple_text;
+pub mod platform;
 
 #[derive(Clone, Copy)]
 pub struct Alignment {

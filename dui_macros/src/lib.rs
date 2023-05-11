@@ -172,7 +172,7 @@ pub fn multi_from(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let tokens = quote! {
         impl<#ty> From<(#val)> for #impl_type<#multi_name<#val>> {
             fn from(value: (#val)) -> Self {
-                VStack {
+                #impl_type {
                     spacing: crate::defaults::DEFAULT_SPACING,
                     element: #multi_name::from((#(#from_vals),*)),
                 }

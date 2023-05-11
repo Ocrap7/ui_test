@@ -97,15 +97,6 @@ impl<E: ElementIterator> VStack<E> {
     }
 }
 
-// impl<E: Element + View> From<E> for VStack<Multi1<E>> {
-//     fn from(value: E) -> Self {
-//         VStack {
-//             spacing: DEFAULT_SPACING,
-//             element: Multi1::from(value),
-//         }
-//     }
-// }
-
 multi_from!(VStack, Multi, 2);
 multi_from!(VStack, Multi, 3);
 multi_from!(VStack, Multi, 4);
@@ -154,6 +145,93 @@ impl<E: ElementIterator> View for VStack<E> {
         }
 
         used_rect.x1 = used_rect.x0 + max_width;
+
+        // Rc::get_mut(&mut lctx.path).unwrap().pop();
+        lctx.path.pop();
+
+        get_id_manger_mut().set_layout_content_rect(Vec::clone(lctx.path), used_rect);
+
+        used_rect
+    }
+
+    fn draw(&self, dctx: DrawingContext) {
+        // Rc::get_mut(&mut dctx.path).unwrap().push(0);
+        let pushed = dctx.push();
+
+        for i in 0..self.element.len() {
+            // *Rc::get_mut(&mut dctx.path).unwrap().last_mut().unwrap() = i as u32;
+            pushed.set_last(i as u32);
+
+            self.element.draw_at(dctx.clone(), i)
+        }
+
+        // Rc::get_mut(&mut dctx.path).unwrap().pop();
+    }
+}
+
+
+pub struct HStack<E: ElementIterator> {
+    spacing: f64,
+    element: E,
+}
+
+impl<E: ElementIterator> HStack<E> {
+    pub fn new(element: impl Into<E>) -> HStack<E> {
+        HStack {
+            spacing: DEFAULT_SPACING,
+            element: element.into(),
+        }
+    }
+}
+
+multi_from!(HStack, Multi, 2);
+multi_from!(HStack, Multi, 3);
+multi_from!(HStack, Multi, 4);
+multi_from!(HStack, Multi, 5);
+multi_from!(HStack, Multi, 6);
+multi_from!(HStack, Multi, 7);
+multi_from!(HStack, Multi, 8);
+multi_from!(HStack, Multi, 9);
+multi_from!(HStack, Multi, 10);
+multi_from!(HStack, Multi, 12);
+multi_from!(HStack, Multi, 13);
+multi_from!(HStack, Multi, 14);
+
+impl<E: ElementIterator> Element for HStack<E> {
+    fn body(&self) -> impl Element + View {}
+}
+
+impl<E: ElementIterator> View for HStack<E> {
+    fn layout(&self, lctx: &mut LayoutContext, available_rect: Rect) -> Rect {
+        let mut used_rect = available_rect;
+        used_rect.x1 = 0.0;
+
+        let mut current_rect = available_rect;
+        let mut max_height = 0.0;
+
+        // Rc::get_mut(&mut lctx.path).unwrap().push(0);
+        lctx.path.push(0);
+
+        for i in 0..self.element.len() {
+            // *Rc::get_mut(&mut lctx.path).unwrap().last_mut().unwrap() = i as u32;
+            *lctx.path.last_mut().unwrap() = i as u32;
+
+            let layout = self.element.layout_at(lctx, current_rect, i);
+
+            used_rect.x1 += layout.width();
+            current_rect.x0 += layout.width();
+
+            if i != self.element.len() - 1 {
+                used_rect.x1 += self.spacing * lctx.scale_factor;
+                current_rect.x0 += self.spacing * lctx.scale_factor;
+            }
+
+            if layout.height() > max_height {
+                max_height = layout.height()
+            }
+        }
+
+        used_rect.y1 = used_rect.y0 + max_height;
 
         // Rc::get_mut(&mut lctx.path).unwrap().pop();
         lctx.path.pop();

@@ -6,10 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-vello = { git = "https://github.com/linebender/vello.git" }
+# vello = { git = "https://github.com/linebender/vello.git" }
+vello = { path = "../../vello" }
 
 dui_macros = { path = "../dui_macros" }
 dui_util = { path = "../dui_util" }
 
 lazy_static = "1.4.0"
 rand = "0.8.5"
+cacao = { git = "https://github.com/ryanmcgrath/cacao.git" }
+objc = "0.2.7"
+raw-window-handle = "0.5.2"
+cocoa = { git = "https://github.com/servo/core-foundation-rs.git", branch = "master" }
+
